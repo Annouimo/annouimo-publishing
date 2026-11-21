@@ -10,11 +10,11 @@ import { notes, isPreview } from '../../lib/notes';
   </section>
   <section class="note-list reading-width" aria-labelledby="notes-title">
     <div class="section-line"><h2 id="notes-title">讲义</h2><span>{notes.length} 篇{isPreview ? ' · 制作预览' : ''}</span></div>
-    {notes.map(note => <a class="note-entry" href={`/notes/${note.slug}/`}>
+    {notes.map(note => <a class="publication-entry" href={`/notes/${note.slug}/`}>
       <div class="note-entry-top"><span>{note.frontmatter.topic}</span><span>{note.frontmatter.draft ? '制作中' : note.frontmatter.date.replaceAll('-', '.')}</span></div>
-      <h3>{note.frontmatter.title}<span aria-hidden="true"> ↗</span></h3>
+      <h2>{note.frontmatter.title}</h2>
       <p>{note.frontmatter.description}</p>
-      <span class="entry-action">开始探索 <span aria-hidden="true">→</span></span>
+      
     </a>)}
     {notes.length === 0 && <p class="empty-state">第一篇讲义正在制作中。</p>}
   </section>
