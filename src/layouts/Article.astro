@@ -6,16 +6,25 @@ interface Props {
   section: string;
   sectionHref: string;
   draft?: boolean;
+  headings?: { depth: number; slug: string; text: string }[];
 }
-const { title, description, date, section, sectionHref, draft } = Astro.props;
+const { title, description, date, section, sectionHref, draft, headings = [] } = Astro.props;
+const sections = headings.filter(heading => heading.depth === 2);
 ---
 <article class="lesson">
   <header class="lesson-header reading-width ann-page-heading">
-    <a class="back-link" href={sectionHref}>← {section}</a>
+    <div class="lesson-meta article-meta"><a href={sectionHref}>{section}</a><span aria-hidden="true">·</span><time datetime={date}>{date.slice(0, 10)}</time>{draft && <span>制作中</span>}</div>
     <h1>{title}</h1>
     {description && <p class="lesson-description ann-heading-details">{description}</p>}
-    <div class="lesson-meta"><time datetime={date}>{date.slice(0, 10)}</time>{draft && <span>制作中</span>}</div>
   </header>
-  <slot name="toc" />
+  <slot name="toc">
+    {sections.length >= 3 && (
+      <nav class="reading-width article-toc" aria-label="本文目录">
+        <details><summary>本文目录</summary><ul>
+          {sections.map(heading => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}
+        </ul></details>
+      </nav>
+    )}
+  </slot>
   <div class="prose"><slot /></div>
 </article>
