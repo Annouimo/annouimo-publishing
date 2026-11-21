@@ -7,10 +7,10 @@ const { title, entries } = Astro.props;
 <Base title={title}>
   <section class="reading-width home-intro">
     <h1>{title}</h1>
-    <ul>
+    <div class="publication-list">
       {entries.map(({ title, href, frontmatter }) => (
-        <li><a href={href}>{title}</a> <time datetime={frontmatter.date}>{frontmatter.date.slice(0, 10)}</time></li>
+        <a class="publication-entry" href={href}><h2>{title}</h2><time datetime={frontmatter.date}>{frontmatter.date.slice(0, 10)}</time></a>
       ))}
-    </ul>
+    </div>
   </section>
 </Base>
