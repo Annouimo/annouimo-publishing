@@ -3,6 +3,7 @@ import '../../.shared-design/tokens.css';
 import '../../.shared-design/navigation.css';
 import '../styles/global.css';
 import { articles, sections } from '../lib/writing';
+import { sectionLabels, sectionPaths } from '../lib/sections';
 import { isPreview } from '../lib/notes';
 import 'katex/dist/katex.min.css';
 interface Props { title?: string; description?: string; preview?: boolean }
@@ -30,7 +31,7 @@ const { title = 'Annouimo', description = '通过可探索的数学与物理讲�
       </div>
       <nav class="ann-topbar-nav" aria-label="站内导航">
         {Object.entries(sections).filter(([id]) => articles.some(article => article.section === id)).map(([id, label]) => <a href={`/${id}/`}>{label}</a>)}
-        <a href="/notes/">讲义</a>
+        <a href={sectionPaths.notes}>{sectionLabels.notes}</a>
         <a href="/archives/">归档</a>
       </nav>
     </header>

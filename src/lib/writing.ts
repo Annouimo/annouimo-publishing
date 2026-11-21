@@ -1,4 +1,5 @@
 import type { MarkdownInstance } from 'astro';
+import { sectionLabels } from './sections';
 
 interface Frontmatter {
   title: string;
@@ -9,7 +10,7 @@ interface Frontmatter {
   description?: string;
 }
 
-export const sections = { blog: '随笔', research: '研究', society: '社会', about: '个人经历' } as const;
+export const { notes: _notes, ...sections } = sectionLabels;
 
 export const articles = Object.entries(import.meta.glob<MarkdownInstance<Frontmatter>>(
   '../content/writing/*/*.md', { eager: true },

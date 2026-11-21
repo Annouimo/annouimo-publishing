@@ -1,16 +1,16 @@
 ---
 import Base from './Base.astro';
-import { sections } from '../lib/writing';
+import { sectionLabels } from '../lib/sections';
 interface Entry {
   title: string;
   href: string;
-  section?: keyof typeof sections | 'notes';
+  section?: keyof typeof sectionLabels;
   frontmatter: { date: string; description?: string; summary?: string };
 }
 interface Props { title: string; entries: Entry[]; byYear?: boolean }
 const { title, entries, byYear = false } = Astro.props;
 const years = byYear ? [...new Set(entries.map(entry => entry.frontmatter.date.slice(0, 4)))] : [''];
-const labels = { ...sections, notes: '讲义' };
+const labels = sectionLabels;
 ---
 <Base title={title}>
   <section class="reading-width home-intro publication-index">

@@ -1,6 +1,7 @@
 ---
 import Archive from '../../layouts/Archive.astro';
+import { sectionLabels } from '../../lib/sections';
 import { notes } from '../../lib/notes';
 const entries = notes.map(note => ({ title: note.frontmatter.title, href: `/notes/${note.slug}/`, frontmatter: note.frontmatter }));
 ---
-<Archive title="讲义" entries={entries} />
+<Archive title={sectionLabels.notes} entries={entries} />

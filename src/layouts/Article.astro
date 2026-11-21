@@ -18,9 +18,9 @@ const sections = headings.filter(heading => heading.depth === 2);
     {description && <p class="lesson-description ann-heading-details">{description}</p>}
   </header>
   <slot name="toc">
-    {sections.length >= 3 && (
-      <nav class="reading-width article-toc" aria-label="本文目录">
-        <details><summary>本文目录</summary><ul>
+    {sections.length >= 2 && (
+      <nav class="article-toc" aria-label="本文目录">
+        <details><summary>目录</summary><ul>
           {sections.map(heading => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}
         </ul></details>
       </nav>
@@ -28,3 +28,15 @@ const sections = headings.filter(heading => heading.depth === 2);
   </slot>
   <div class="prose"><slot /></div>
 </article>
+
+<script>
+  const nav = document.querySelector<HTMLElement>('.article-toc');
+  const details = nav?.querySelector('details');
+  const wide = window.matchMedia('(min-width: 1320px)');
+  const sync = () => { if (details) details.open = wide.matches; };
+  sync();
+  wide.addEventListener('change', sync);
+  nav?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+    if (!wide.matches && details) details.open = false;
+  }));
+</script>
