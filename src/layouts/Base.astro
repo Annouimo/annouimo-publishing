@@ -26,12 +26,12 @@ const { title = 'Annouimo', description = '通过可探索的数学与物理讲�
       <div class="ann-site-identity">
         <a href={preview ? 'https://shared-design.www.annouimo.com/' : 'https://www.annouimo.com/'} aria-label="Annouimo 的个人主页">Annouimo</a>
         <span aria-hidden="true">›</span>
-        <a href="/">博客与讲义</a>
+        <a href="/">博客</a>
       </div>
       <nav class="ann-topbar-nav" aria-label="站内导航">
         {Object.entries(sections).filter(([id]) => articles.some(article => article.section === id)).map(([id, label]) => <a href={`/${id}/`}>{label}</a>)}
+        <a href="/notes/">讲义</a>
         <a href="/archives/">归档</a>
-        <a href="/notes/">求知札记</a>
       </nav>
     </header>
     <main id="main"><slot /></main>
