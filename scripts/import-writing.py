@@ -45,7 +45,7 @@ def load_articles(source):
         if not section or not meta.get("title") or not isinstance(slug, str) or not SLUG.fullmatch(slug):
             raise ValueError(f"{relative}: expected section, title and valid slug")
         for field in ("date", "lastmod"):
-            value = meta.get(field, meta.get("date"))
+            value = meta.get(field) or meta.get("date")
             if isinstance(value, (date, datetime)):
                 value = value.isoformat()
             if not isinstance(value, str):
