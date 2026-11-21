@@ -7,8 +7,8 @@ interface Entry {
   section?: keyof typeof sectionLabels;
   frontmatter: { date: string; description?: string; summary?: string };
 }
-interface Props { title: string; entries: Entry[]; byYear?: boolean }
-const { title, entries, byYear = false } = Astro.props;
+interface Props { title: string; entries: Entry[]; byYear?: boolean; showSection?: boolean; moreHref?: string; moreLabel?: string }
+const { title, entries, byYear = false, showSection = false, moreHref, moreLabel } = Astro.props;
 const years = byYear ? [...new Set(entries.map(entry => entry.frontmatter.date.slice(0, 4)))] : [''];
 const labels = sectionLabels;
 ---
@@ -25,7 +25,7 @@ const labels = sectionLabels;
               {!byYear && (frontmatter.description || frontmatter.summary) && <p>{frontmatter.description || frontmatter.summary}</p>}
             </div>
             <span class="publication-entry-meta">
-              {byYear && section && <span>{labels[section]} · </span>}
+              {(byYear || showSection) && section && <span>{labels[section]} · </span>}
               <time datetime={frontmatter.date}>{frontmatter.date.slice(0, 10)}</time>
             </span>
           </a>
