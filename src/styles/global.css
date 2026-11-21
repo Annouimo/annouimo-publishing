@@ -28,7 +28,7 @@
 
 /* Shared list treatment for writing and notes. */
 .publication-list { margin-top: 2rem; }
-.publication-entry { display:block; padding: 1.4rem 0; border-top: 1px solid var(--border); }
+.publication-entry { display:block; padding: .65rem 0; }
 .publication-entry:hover { text-decoration:none; }
 .publication-entry:hover h2 { text-decoration:underline; text-underline-offset:.2em; }
 .publication-entry h2 { margin: .4rem 0; font-size: 1.25rem; line-height: 1.4; }
@@ -41,7 +41,7 @@
 .lesson-header h1, .lesson-description, .prose {
   font-family: var(--reading-serif);
 }
-.publication-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: .4rem 1.5rem; }
+.publication-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 0 1.5rem; }
 .publication-title { display: block; font-size: 1.25rem; line-height: 1.45; font-weight: 500; }
 .publication-entry:hover .publication-title { text-decoration: underline; text-underline-offset: .2em; }
 .publication-entry-meta { white-space: nowrap; color: var(--muted); font-size: .78rem; }
@@ -52,7 +52,8 @@
 .prose { font-size: 18px; line-height: 1.75; }
 .prose :is(h2, h3, h4) { font-weight: 500; }
 @media (max-width: 600px) {
-  .publication-entry { grid-template-columns: minmax(0, 1fr); }
+  .publication-entry { grid-template-columns: minmax(0, 1fr); gap: .15rem; padding: .65rem 0; }
+  .publication-entry-meta { white-space: normal; font-size: .74rem; }
   .prose { font-size: 17px; }
 }
 
