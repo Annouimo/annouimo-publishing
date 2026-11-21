@@ -25,3 +25,12 @@
 @media(max-width:600px){.dimension-text{font-size:14px}.plot-tick{font-size:11px}.explorer-footer{font-size:.66rem}.experiment-scope{font-size:.64rem!important}}
 
 @media (max-width: 520px){.site-header{align-items:flex-start;flex-direction:column;gap:8px}.site-header nav{flex-wrap:wrap;column-gap:16px;row-gap:4px}.site-header nav a{padding-block:6px}}
+
+/* Shared list treatment for writing and notes. */
+.publication-list { margin-top: 2rem; }
+.publication-entry { display:block; padding: 1.4rem 0; border-top: 1px solid var(--border); }
+.publication-entry:hover { text-decoration:none; }
+.publication-entry:hover h2 { text-decoration:underline; text-underline-offset:.2em; }
+.publication-entry h2 { margin: .4rem 0; font-size: 1.25rem; line-height: 1.4; }
+.publication-entry p { margin: .55rem 0; color: var(--muted); font-size: .92rem; }
+.publication-entry time, .publication-entry .note-entry-top { color:var(--muted); font-size:.78rem; }
