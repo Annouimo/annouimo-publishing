@@ -7,12 +7,17 @@ import remarkCallouts from './scripts/remark-callouts.mjs';
 
 import cloudflare from '@astrojs/cloudflare';
 
+const remarkPlugins = [remarkMath, remarkCallouts];
+const rehypePlugins = [rehypeKatex];
+
 export default defineConfig({
   site: 'https://blog.annouimo.com',
   output: 'static',
   session: false,
   trailingSlash: 'always',
-  integrations: [mdx()],
-  markdown: { processor: unified({ remarkPlugins: [remarkMath, remarkCallouts], rehypePlugins: [rehypeKatex] }) },
+  integrations: [mdx({ remarkPlugins, rehypePlugins })],
+  markdown: {
+    processor: unified({ remarkPlugins, rehypePlugins }),
+  },
   adapter: cloudflare({ imageService: 'passthrough', prerenderEnvironment: 'node' }),
 });

@@ -1,5 +1,11 @@
 ---
 import Archive from '../layouts/Archive.astro';
-import { articles } from '../lib/writing';
+import { publications } from '../lib/publications';
 ---
-<Archive title="博客" entries={articles} />
+<Archive
+  title="最近发布"
+  entries={publications.slice(0, 6)}
+  showSection
+  moreHref="/archives/"
+  moreLabel="查看全部归档 →"
+/>

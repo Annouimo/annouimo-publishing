@@ -28,7 +28,7 @@
 
 /* Shared list treatment for writing and notes. */
 .publication-list { margin-top: 2rem; }
-.publication-entry { display:block; padding: 1.4rem 0; border-top: 1px solid var(--border); }
+.publication-entry { display:block; padding: .65rem 0; }
 .publication-entry:hover { text-decoration:none; }
 .publication-entry:hover h2 { text-decoration:underline; text-underline-offset:.2em; }
 .publication-entry h2 { margin: .4rem 0; font-size: 1.25rem; line-height: 1.4; }
@@ -41,7 +41,7 @@
 .lesson-header h1, .lesson-description, .prose {
   font-family: var(--reading-serif);
 }
-.publication-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: .4rem 1.5rem; }
+.publication-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 0 1.5rem; }
 .publication-title { display: block; font-size: 1.25rem; line-height: 1.45; font-weight: 500; }
 .publication-entry:hover .publication-title { text-decoration: underline; text-underline-offset: .2em; }
 .publication-entry-meta { white-space: nowrap; color: var(--muted); font-size: .78rem; }
@@ -51,10 +51,9 @@
 .article-meta a { color: var(--focus); }
 .prose { font-size: 18px; line-height: 1.75; }
 .prose :is(h2, h3, h4) { font-weight: 500; }
-.article-toc { margin-block: 1.75rem; padding-block: .7rem; border-block: 1px solid var(--border); }
-.article-toc summary { cursor: pointer; }
 @media (max-width: 600px) {
-  .publication-entry { grid-template-columns: minmax(0, 1fr); }
+  .publication-entry { grid-template-columns: minmax(0, 1fr); gap: .15rem; padding: .65rem 0; }
+  .publication-entry-meta { white-space: normal; font-size: .74rem; }
   .prose { font-size: 17px; }
 }
 
@@ -62,12 +61,63 @@
 .callout-title { color: var(--focus); font-family: system-ui, sans-serif; font-size: .9rem; font-weight: 600; margin-bottom: .5rem; }
 .callout > :last-child { margin-bottom: 0; }
 .callout > p:first-of-type { margin-top: .4rem; }
-.article-toc { position: fixed; right: 16px; bottom: 16px; z-index: 20; max-width: min(340px, calc(100vw - 32px)); border: 1px solid var(--border); background: var(--paper); border-radius: 8px; }
-.article-toc summary { min-height: 44px; padding: 10px 14px; cursor: pointer; }
-.article-toc ul { max-height: 55dvh; overflow-y: auto; margin: 0; padding: 0 1.5rem 1rem 2.2rem; }
-.article-toc li { overflow-wrap: anywhere; margin: .4rem 0; }
-@media (min-width: 1320px) {
- .article-toc { left: max(16px, calc(50vw - 640px)); right: auto; top: 180px; bottom: auto; width: 200px; border: 0; background: transparent; }
- .article-toc ul { max-height: 65vh; }
-}
 .prose .katex-display { overflow-x: auto; overflow-y: hidden; }
+
+.article-toc {
+  margin-block-start: 1.5rem;
+  border-block: 1px solid var(--border);
+  font-size: .875rem;
+  line-height: 1.55;
+}
+
+.article-toc summary {
+  display: grid;
+  grid-template-columns: 1fr auto .45em;
+  align-items: center;
+  gap: .75rem;
+  min-height: 44px;
+  padding: .75rem 1rem;
+  list-style: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.article-toc summary::-webkit-details-marker {
+  display: none;
+}
+
+.article-toc summary::after {
+  content: "";
+  width: .45em;
+  height: .45em;
+  border-right: 1px solid var(--muted);
+  border-bottom: 1px solid var(--muted);
+  transform: translateY(-.12em) rotate(45deg);
+}
+
+.article-toc details[open] > summary::after {
+  transform: translateY(.12em) rotate(225deg);
+}
+
+.article-toc-count {
+  color: var(--muted);
+  font-size: .8125rem;
+  font-weight: 400;
+}
+
+.article-toc ul {
+  margin: 0;
+  padding: 0 1rem .75rem;
+  list-style: none;
+}
+
+.article-toc a {
+  display: block;
+  padding-block: .375rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.article-toc a:hover {
+  color: var(--fg);
+}
