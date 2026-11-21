@@ -1,6 +1,6 @@
 # Annouimo Publishing
 
-Astro 发布工程，负责博客与求知札记的模板、正文样式、归档和 RSS。
+Astro 发布工程，负责博客与讲义的模板、正文样式、归档和 RSS。
 
 - 博客原稿由 annouimo-writing 提供。导入只读取明确标记为可发布的 Markdown，构建目录是临时产物。
 - 讲义及其专用组件由 annouimo-notes 提供，`notes.lock` 固定来源提交。`NOTES_SOURCE` 可指向本地 annouimo-notes 工作树。
