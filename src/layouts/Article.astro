@@ -19,24 +19,15 @@ const sections = headings.filter(heading => heading.depth === 2);
   </header>
   <slot name="toc">
     {sections.length >= 2 && (
-      <nav class="article-toc" aria-label="本文目录">
-        <details><summary>目录</summary><ul>
-          {sections.map(heading => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}
-        </ul></details>
+      <nav class="article-toc reading-width" aria-label="本文目录">
+        <details>
+          <summary><span>目录</span><span class="article-toc-count">{sections.length} 节</span></summary>
+          <ul>
+            {sections.map(heading => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}
+          </ul>
+        </details>
       </nav>
     )}
   </slot>
   <div class="prose"><slot /></div>
 </article>
-
-<script>
-  const nav = document.querySelector<HTMLElement>('.article-toc');
-  const details = nav?.querySelector('details');
-  const wide = window.matchMedia('(min-width: 1320px)');
-  const sync = () => { if (details) details.open = wide.matches; };
-  sync();
-  wide.addEventListener('change', sync);
-  nav?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
-    if (!wide.matches && details) details.open = false;
-  }));
-</script>
