@@ -12,7 +12,7 @@ if [[ -n "${NOTES_SOURCE:-}" ]]; then
   source_dir="$(realpath "$NOTES_SOURCE")"
 else
   curl --fail --silent --show-error --location --retry 2 \
-    "https://codeload.github.com/Annouimo/why-notes/tar.gz/$revision" |
+    "https://codeload.github.com/Annouimo/annouimo-notes/tar.gz/$revision" |
     tar -xz -C "$temp" --strip-components=1
   source_dir="$temp"
 fi
@@ -25,4 +25,4 @@ cp -R "$source_dir/src/components" src/components
 for file in continuity-element.ts continuity.ts examples.ts; do
   cp "$source_dir/src/lib/$file" "src/lib/$file"
 done
-printf 'Imported why-notes %s\n' "$revision"
+printf 'Imported annouimo-notes %s\n' "$revision"
