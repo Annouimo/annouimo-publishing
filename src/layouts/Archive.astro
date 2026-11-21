@@ -1,16 +1,36 @@
 ---
 import Base from './Base.astro';
-
-interface Props { title: string; entries: { title: string; href: string; frontmatter: { date: string } }[] }
-const { title, entries } = Astro.props;
+import { sections } from '../lib/writing';
+interface Entry {
+  title: string;
+  href: string;
+  section?: keyof typeof sections | 'notes';
+  frontmatter: { date: string; description?: string; summary?: string };
+}
+interface Props { title: string; entries: Entry[]; byYear?: boolean }
+const { title, entries, byYear = false } = Astro.props;
+const years = byYear ? [...new Set(entries.map(entry => entry.frontmatter.date.slice(0, 4)))] : [''];
+const labels = { ...sections, notes: '讲义' };
 ---
 <Base title={title}>
-  <section class="reading-width home-intro">
+  <section class="reading-width home-intro publication-index">
     <h1>{title}</h1>
-    <div class="publication-list">
-      {entries.map(({ title, href, frontmatter }) => (
-        <a class="publication-entry" href={href}><h2>{title}</h2><time datetime={frontmatter.date}>{frontmatter.date.slice(0, 10)}</time></a>
-      ))}
-    </div>
+    {years.map(year => (
+      <div class="publication-list">
+        {year && <h2 class="publication-year">{year}</h2>}
+        {(year ? entries.filter(entry => entry.frontmatter.date.startsWith(year)) : entries).map(({ title, href, section, frontmatter }) => (
+          <a class="publication-entry" href={href}>
+            <div class="publication-entry-copy">
+              <span class="publication-title">{title}</span>
+              {!byYear && (frontmatter.description || frontmatter.summary) && <p>{frontmatter.description || frontmatter.summary}</p>}
+            </div>
+            <span class="publication-entry-meta">
+              {byYear && section && <span>{labels[section]} · </span>}
+              <time datetime={frontmatter.date}>{frontmatter.date.slice(0, 10)}</time>
+            </span>
+          </a>
+        ))}
+      </div>
+    ))}
   </section>
 </Base>
