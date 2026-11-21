@@ -19,19 +19,15 @@ const { title = 'Annouimo', description = '通过可探索的数学与物理讲�
     <meta name="theme-color" content="#f5f4ed" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title === 'Annouimo' ? title : `${title} · Annouimo`}</title>
-    <script is:inline>
-      try { const theme = localStorage.getItem('why-notes-theme'); if (theme) document.documentElement.dataset.theme = theme; } catch {}
-    </script>
   </head>
   <body>
     <a class="skip-link" href="#main">跳至正文</a>
     <header class="ann-topbar">
-      <a class="ann-home-link" href={import.meta.env.PUBLIC_HOME_URL || "https://www.annouimo.com/"}>个人主页</a>
-      <a href="/" class="brand">求知札记<span class="brand-dot" aria-hidden="true">.</span></a>
-      <nav class="ann-site-nav" aria-label="主导航">
-        <a href="/">讲义</a>
-        <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
-      </nav>
+      <div class="ann-site-identity">
+        <a href={preview ? 'https://shared-design.www.annouimo.com/' : 'https://www.annouimo.com/'} aria-label="Annouimo 的个人主页">Annouimo</a>
+        <span aria-hidden="true">›</span>
+        <a href="/">博客与讲义</a>
+      </div>
       <nav class="ann-topbar-nav" aria-label="站内导航">
         {Object.entries(sections).filter(([id]) => articles.some(article => article.section === id)).map(([id, label]) => <a href={`/${id}/`}>{label}</a>)}
         <a href="/archives/">归档</a>
