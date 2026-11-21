@@ -71,3 +71,39 @@
  .article-toc ul { max-height: 65vh; }
 }
 .prose .katex-display { overflow-x: auto; overflow-y: hidden; }
+
+
+/* Article navigation: keep long labels readable and let the mobile menu open upward. */
+.article-toc details { position: relative; }
+.article-toc summary { list-style: none; }
+.article-toc summary::-webkit-details-marker { display: none; }
+.article-toc ul { list-style: none; }
+.article-toc li a { display: block; overflow-wrap: anywhere; line-height: 1.55; }
+.article-toc details[open] > ul {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(60dvh, 32rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: .8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--paper);
+  box-shadow: 0 4px 20px #0002;
+}
+.article-toc details[open] > ul li { margin: .35rem 0; }
+@media (min-width: 1320px) {
+  .article-toc { width: 210px; }
+  .article-toc details[open] > ul {
+    position: static;
+    width: auto;
+    max-height: min(65vh, 42rem);
+    padding: 0 0 .5rem;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
