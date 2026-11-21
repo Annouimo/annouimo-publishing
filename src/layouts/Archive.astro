@@ -22,7 +22,6 @@ const labels = sectionLabels;
           <a class="publication-entry" href={href}>
             <div class="publication-entry-copy">
               <span class="publication-title">{title}</span>
-              {!byYear && (frontmatter.description || frontmatter.summary) && <p>{frontmatter.description || frontmatter.summary}</p>}
             </div>
             <span class="publication-entry-meta">
               {(byYear || showSection) && section && <span>{labels[section]} · </span>}
