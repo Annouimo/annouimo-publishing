@@ -9,7 +9,7 @@ const { article } = Astro.props;
 const { Content, frontmatter } = article;
 ---
 <Base title={article.title} description={frontmatter.description}>
-  <Article title={article.title} date={frontmatter.date} description={frontmatter.description} section={sections[article.section]} sectionHref={`/${article.section}/`}>
+  <Article title={article.title} date={frontmatter.date} description={frontmatter.description} section={sections[article.section]} sectionHref={`/${article.section}/`} headings={article.getHeadings()}>
     <Content />
   </Article>
 </Base>
