@@ -51,8 +51,6 @@
 .article-meta a { color: var(--focus); }
 .prose { font-size: 18px; line-height: 1.75; }
 .prose :is(h2, h3, h4) { font-weight: 500; }
-.article-toc { margin-block: 1.75rem; padding-block: .7rem; border-block: 1px solid var(--border); }
-.article-toc summary { cursor: pointer; }
 @media (max-width: 600px) {
   .publication-entry { grid-template-columns: minmax(0, 1fr); }
   .prose { font-size: 17px; }
@@ -62,101 +60,63 @@
 .callout-title { color: var(--focus); font-family: system-ui, sans-serif; font-size: .9rem; font-weight: 600; margin-bottom: .5rem; }
 .callout > :last-child { margin-bottom: 0; }
 .callout > p:first-of-type { margin-top: .4rem; }
-.article-toc { position: fixed; right: 16px; bottom: 16px; z-index: 20; max-width: min(340px, calc(100vw - 32px)); border: 1px solid var(--border); background: var(--paper); border-radius: 8px; }
-.article-toc summary { min-height: 44px; padding: 10px 14px; cursor: pointer; }
-.article-toc ul { max-height: 55dvh; overflow-y: auto; margin: 0; padding: 0 1.5rem 1rem 2.2rem; }
-.article-toc li { overflow-wrap: anywhere; margin: .4rem 0; }
-@media (min-width: 1320px) {
- .article-toc { left: max(16px, calc(50vw - 640px)); right: auto; top: 180px; bottom: auto; width: 200px; border: 0; background: transparent; }
- .article-toc ul { max-height: 65vh; }
-}
 .prose .katex-display { overflow-x: auto; overflow-y: hidden; }
 
-
-/* Article navigation: keep long labels readable and let the mobile menu open upward. */
-.article-toc details { position: relative; }
-.article-toc summary { list-style: none; }
-.article-toc summary::-webkit-details-marker { display: none; }
-.article-toc ul { list-style: none; }
-.article-toc li a { display: block; overflow-wrap: anywhere; line-height: 1.55; }
-.article-toc details[open] > ul {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + 8px);
-  width: min(360px, calc(100vw - 32px));
-  max-height: min(60dvh, 32rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: .8rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--paper);
-  box-shadow: 0 4px 20px #0002;
-}
-.article-toc details[open] > ul li { margin: .35rem 0; }
-@media (min-width: 1320px) {
-  .article-toc { width: 210px; }
-  .article-toc details[open] > ul {
-    position: static;
-    width: auto;
-    max-height: min(65vh, 42rem);
-    padding: 0 0 .5rem;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-}
-
-
-/* Keep the article contents in the reading flow on every screen size. */
 .article-toc {
-  position: static;
-  width: auto;
-  max-width: 720px;
-  margin: 1.6rem auto 0;
-  padding: .75rem 0;
+  margin-block-start: 1.5rem;
   border-block: 1px solid var(--border);
-  background: transparent;
-  box-shadow: none;
-  font-size: .82rem;
+  font-size: .875rem;
+  line-height: 1.55;
 }
-.article-toc details { position: static; }
+
 .article-toc summary {
-  min-height: 44px;
-  padding: .45rem 0;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto .45em;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  gap: .75rem;
+  min-height: 44px;
+  padding: .75rem 1rem;
+  list-style: none;
   cursor: pointer;
-  color: var(--fg);
   font-weight: 500;
 }
-.article-toc summary::marker { color: var(--muted); }
-.article-toc .article-toc-count {
+
+.article-toc summary::-webkit-details-marker {
+  display: none;
+}
+
+.article-toc summary::after {
+  content: "";
+  width: .45em;
+  height: .45em;
+  border-right: 1px solid var(--muted);
+  border-bottom: 1px solid var(--muted);
+  transform: translateY(-.12em) rotate(45deg);
+}
+
+.article-toc details[open] > summary::after {
+  transform: translateY(.12em) rotate(225deg);
+}
+
+.article-toc-count {
   color: var(--muted);
-  font-size: .75rem;
+  font-size: .8125rem;
   font-weight: 400;
 }
-.article-toc ul,
-.article-toc details[open] > ul {
-  position: static;
-  width: auto;
-  max-height: none;
-  overflow: visible;
-  margin: .35rem 0 .25rem;
-  padding: .25rem 0 .25rem 1.15rem;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
+
+.article-toc ul {
+  margin: 0;
+  padding: 0 1rem .75rem;
+  list-style: none;
 }
-.article-toc li { margin: .25rem 0; }
-.article-toc li a {
-  display: inline;
-  overflow-wrap: anywhere;
-  line-height: 1.65;
+
+.article-toc a {
+  display: block;
+  padding-block: .375rem;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
-.article-toc li a:hover { color: var(--fg); }
+
+.article-toc a:hover {
+  color: var(--fg);
+}
