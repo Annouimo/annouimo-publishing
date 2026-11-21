@@ -34,3 +34,26 @@
 .publication-entry h2 { margin: .4rem 0; font-size: 1.25rem; line-height: 1.4; }
 .publication-entry p { margin: .55rem 0; color: var(--muted); font-size: .92rem; }
 .publication-entry time, .publication-entry .note-entry-top { color:var(--muted); font-size:.78rem; }
+
+/* Blog and lesson typography */
+:root { --reading-serif: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", SimSun, Georgia, serif; }
+.publication-index h1, .publication-title, .publication-year,
+.lesson-header h1, .lesson-description, .prose {
+  font-family: var(--reading-serif);
+}
+.publication-entry { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: .4rem 1.5rem; }
+.publication-title { display: block; font-size: 1.25rem; line-height: 1.45; font-weight: 500; }
+.publication-entry:hover .publication-title { text-decoration: underline; text-underline-offset: .2em; }
+.publication-entry-meta { white-space: nowrap; color: var(--muted); font-size: .78rem; }
+.publication-year { font-size: 1.2rem; font-weight: 500; margin: 0 0 .75rem; }
+.lesson-header h1 { font-weight: 500; }
+.lesson-header .article-meta { display: flex; align-items: baseline; flex-wrap: wrap; gap: .45rem; margin: 0 0 1rem; }
+.article-meta a { color: var(--focus); }
+.prose { font-size: 18px; line-height: 1.75; }
+.prose :is(h2, h3, h4) { font-weight: 500; }
+.article-toc { margin-block: 1.75rem; padding-block: .7rem; border-block: 1px solid var(--border); }
+.article-toc summary { cursor: pointer; }
+@media (max-width: 600px) {
+  .publication-entry { grid-template-columns: minmax(0, 1fr); }
+  .prose { font-size: 17px; }
+}
