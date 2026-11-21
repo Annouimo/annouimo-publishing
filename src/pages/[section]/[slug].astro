@@ -1,0 +1,15 @@
+---
+import Base from '../../layouts/Base.astro';
+import Article from '../../layouts/Article.astro';
+import { articles, sections } from '../../lib/writing';
+export function getStaticPaths() {
+  return articles.map(article => ({ params: { section: article.section, slug: article.slug }, props: { article } }));
+}
+const { article } = Astro.props;
+const { Content, frontmatter } = article;
+---
+<Base title={article.title} description={frontmatter.description}>
+  <Article title={article.title} date={frontmatter.date} description={frontmatter.description} section={sections[article.section]} sectionHref={`/${article.section}/`}>
+    <Content />
+  </Article>
+</Base>

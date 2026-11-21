@@ -1,0 +1,11 @@
+---
+import Archive from '../../layouts/Archive.astro';
+import { articles, sections } from '../../lib/writing';
+export function getStaticPaths() {
+  return Object.entries(sections).flatMap(([section, title]) => {
+    const entries = articles.filter(article => article.section === section);
+    return entries.length ? [{ params: { section }, props: { title, entries } }] : [];
+  });
+}
+---
+<Archive {...Astro.props} />

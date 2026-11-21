@@ -1,0 +1,16 @@
+---
+import Base from './Base.astro';
+import { articles } from '../lib/writing';
+interface Props { title: string; entries: typeof articles }
+const { title, entries } = Astro.props;
+---
+<Base title={title}>
+  <section class="reading-width home-intro">
+    <h1>{title}</h1>
+    <ul>
+      {entries.map(({ title, href, frontmatter }) => (
+        <li><a href={href}>{title}</a> <time datetime={frontmatter.date}>{frontmatter.date.slice(0, 10)}</time></li>
+      ))}
+    </ul>
+  </section>
+</Base>

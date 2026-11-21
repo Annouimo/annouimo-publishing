@@ -1,0 +1,44 @@
+---
+import '../../.shared-design/tokens.css';
+import '../../.shared-design/navigation.css';
+import '../styles/global.css';
+import { articles, sections } from '../lib/writing';
+import { isPreview } from '../lib/notes';
+import 'katex/dist/katex.min.css';
+interface Props { title?: string; description?: string; preview?: boolean }
+const { title = 'Annouimo', description = '通过可探索的数学与物理讲义来学习。', preview = isPreview } = Astro.props;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    {preview && <meta name="robots" content="noindex, nofollow" />}
+    {!preview && <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />}
+    <meta name="theme-color" content="#f5f4ed" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{title === 'Annouimo' ? title : `${title} · Annouimo`}</title>
+    <script is:inline>
+      try { const theme = localStorage.getItem('why-notes-theme'); if (theme) document.documentElement.dataset.theme = theme; } catch {}
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳至正文</a>
+    <header class="ann-topbar">
+      <a class="ann-home-link" href={import.meta.env.PUBLIC_HOME_URL || "https://www.annouimo.com/"}>个人主页</a>
+      <a href="/" class="brand">求知札记<span class="brand-dot" aria-hidden="true">.</span></a>
+      <nav class="ann-site-nav" aria-label="主导航">
+        <a href="/">讲义</a>
+        <button class="theme-toggle" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true">◐</span></button>
+      </nav>
+      <nav class="ann-topbar-nav" aria-label="站内导航">
+        {Object.entries(sections).filter(([id]) => articles.some(article => article.section === id)).map(([id, label]) => <a href={`/${id}/`}>{label}</a>)}
+        <a href="/archives/">归档</a>
+        <a href="/notes/">求知札记</a>
+      </nav>
+    </header>
+    <main id="main"><slot /></main>
+    <footer class="site-footer"><span>Annouimo</span><a href="/index.xml">RSS</a></footer>
+  </body>
+</html>

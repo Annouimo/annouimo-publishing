@@ -1,0 +1,32 @@
+{
+  "name": "annouimo-publishing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "prepare:content": "python3 scripts/sync-design.py && bash scripts/import-notes.sh",
+    "dev": "npm run prepare:content && WHY_NOTES_PREVIEW=1 astro dev",
+    "build": "npm run prepare:content && astro build",
+    "build:preview": "WHY_NOTES_PREVIEW=1 npm run build",
+    "check": "npm run prepare:content && astro check"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^15.0.0-beta.5",
+    "@astrojs/markdown-remark": "^7.3.8",
+    "@astrojs/mdx": "^8.1.5",
+    "astro": "7.4.11",
+    "katex": "0.16.47",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@types/katex": "^0.16.8",
+    "@types/node": "^26.6.6",
+    "cf": "^1.0.0-beta.32",
+    "typescript": "^6.0.3"
+  }
+}

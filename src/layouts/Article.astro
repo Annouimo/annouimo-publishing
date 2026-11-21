@@ -1,0 +1,21 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  date: string;
+  section: string;
+  sectionHref: string;
+  draft?: boolean;
+}
+const { title, description, date, section, sectionHref, draft } = Astro.props;
+---
+<article class="lesson">
+  <header class="lesson-header reading-width ann-page-heading">
+    <a class="back-link" href={sectionHref}>← {section}</a>
+    <h1>{title}</h1>
+    {description && <p class="lesson-description ann-heading-details">{description}</p>}
+    <div class="lesson-meta"><time datetime={date}>{date.slice(0, 10)}</time>{draft && <span>制作中</span>}</div>
+  </header>
+  <slot name="toc" />
+  <div class="prose"><slot /></div>
+</article>
