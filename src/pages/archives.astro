@@ -1,5 +1,10 @@
 ---
 import Archive from '../layouts/Archive.astro';
 import { articles } from '../lib/writing';
+import { notes } from '../lib/notes';
+const entries = [
+  ...articles,
+  ...notes.map(note => ({ title: note.frontmatter.title, href: `/notes/${note.slug}/`, frontmatter: note.frontmatter })),
+].sort((a, b) => b.frontmatter.date.localeCompare(a.frontmatter.date));
 ---
-<Archive title="归档" entries={articles} />
+<Archive title="归档" entries={entries} />
