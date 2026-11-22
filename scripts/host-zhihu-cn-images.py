@@ -25,7 +25,7 @@ RE_IMAGE = re.compile(r'!\[([^\]\n]*)\]\((images/([a-z]+\.png))\)')
 SOURCE_DENY = re.compile(r'(?:annouimo|why[-_ ]?notes|github\.com|https?://|www\.|个人网站|我的博客|阅读原文)', re.I)
 PNG = b'\x89PNG\r\n\x1a\n'
 HOSTS = {
-    'czl': {'img.czl.net'},
+    'czl': {'img.czl.net', 'i.czl.net'},
     'scdn': {'esaimg.cdn1.vip', 'edgeoneimg.cdn1.vip', 'img.scdn.io'},
 }
 HEADERS = {'User-Agent': 'Mozilla/5.0 (compatible; NotesZhihuImport/1.0)',
@@ -115,7 +115,7 @@ def verify_png(url, original, provider):
     from PIL import Image, ImageChops
     a = Image.open(io.BytesIO(original)).convert('RGBA')
     b = Image.open(io.BytesIO(received)).convert('RGBA')
-    if a.size != b.size or ImageChops.difference(a, b).getbbox() is not None:
+    if a.size != b.size or ImageChops.difference(a.convert('RGB'), b.convert('RGB')).getbbox() is not None:
         raise ValueError(f'Uploaded image differs in pixel content: {url}')
     return 'identical pixels'
 
@@ -182,8 +182,6 @@ def export(args):
     rewritten = RE_IMAGE.sub(lambda m: f'![{m.group(1)}]({urls[m.group(3)]})', source)
     if len(re.findall(r'!\[[^\]\n]*\]\(https://', rewritten)) != 7:
         raise ValueError('Mismatch after link replacement')
-    restored = re.sub(r'!\[([^\]\n]*)\]\(https://[^)]+/[^)]+\.png\)',
-                      lambda m: f'![{m.group(1)}](images/{list(images)[0]})', rewritten)
     # Stronger check: replace each exact remote URL by original local link.
     reverse = dict((value, name) for name, value in urls.items())
     check = re.sub(r'!\[([^\]\n]*)\]\((https://[^)]+)\)',
