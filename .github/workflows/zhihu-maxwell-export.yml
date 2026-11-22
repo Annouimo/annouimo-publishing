@@ -38,7 +38,7 @@ jobs:
         run: |
           cat > astro-zhihu.config.mjs <<'EOF'
           import { defineConfig } from 'astro/config';
-          export default defineConfig({output:'static', server: {host:'127.0.0.1', port:4321}});
+          export default defineConfig({output:'static', devToolbar:{enabled:false}, server: {host:'127.0.0.1', port:4321}});
           EOF
           ./node_modules/.bin/astro dev --config ./astro-zhihu.config.mjs --host 127.0.0.1 --port 4321 > /tmp/zhihu-astro.log 2>&1 &
           echo $! > /tmp/zhihu-astro.pid
