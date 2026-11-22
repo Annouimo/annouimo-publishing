@@ -76,6 +76,12 @@ try {
     const wave = document.querySelector('[data-capture="lab-wave"] svg[data-wave]');
     return field && field.childElementCount > 10 && wave && wave.childElementCount > 10;
   }, null, {timeout: 30000});
+  // Astro dev can show a Vite diagnostics overlay for unrelated hot reloads.
+  // Capture its text for review, then hide it so it cannot obscure the export.
+  const overlays = await page.evaluate(() => [...document.querySelectorAll('vite-error-overlay')]
+    .map(el => el.shadowRoot?.textContent?.slice(0, 1500) || 'overlay without readable text'));
+  for (const item of overlays) process.stderr.write('Vite overlay: ' + item + '\n');
+  await page.addStyleTag({content: 'vite-error-overlay { display: none !important; pointer-events: none !important }'});
 
   const metadata = {figures: {}, labs: {}};
   for (const kind of figureKinds) {
@@ -95,7 +101,7 @@ try {
   for (const id of labStates.field) {
     const button = field.locator('button[data-field="' + id + '"]');
     const label = textOrThrow(await button.innerText(), 'field ' + id);
-    await button.click();
+    await button.evaluate(element => element.click());
     const result = textOrThrow(await field.locator('[data-result]').innerText(), 'field result');
     await safeShot(field.locator('svg[data-plot]'), 'lab-field-' + id + '.png');
     fieldStates.push({id, label, result});
@@ -109,7 +115,7 @@ try {
   for (const [id, which] of [['s1','one'], ['s2','two']]) {
     const button = capacitor.locator('button[data-surface="' + which + '"]');
     const label = textOrThrow(await button.innerText(), 'capacitor ' + id);
-    await button.click();
+    await button.evaluate(element => element.click());
     const result = textOrThrow(await capacitor.locator('[data-result]').innerText(), 'capacitor result');
     await safeShot(capacitor.locator('svg.lab-svg'), 'lab-capacitor-' + id + '.png');
     capacitorStates.push({id, label, result});
