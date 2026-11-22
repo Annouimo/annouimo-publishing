@@ -2,7 +2,7 @@
 """Prepare a Zhihu-ready Markdown using a mainland-facing public image host.
 
 Only uploads the seven non-sensitive teaching figures; never contacts Zhihu.
-Use --provider czl (anonymous API) or --provider scdn (mainland CDN).
+Use --provider zjf (anonymous original-quality PNG), czl or scdn.
 Each uploaded image is downloaded again and integrity-checked before output.
 """
 import argparse
@@ -27,6 +27,7 @@ PNG = b'\x89PNG\r\n\x1a\n'
 HOSTS = {
     'czl': {'img.czl.net', 'i.czl.net'},
     'scdn': {'esaimg.cdn1.vip', 'edgeoneimg.cdn1.vip', 'img.scdn.io'},
+    'zjf': {'img.zjf.ai'},
 }
 HEADERS = {'User-Agent': 'Mozilla/5.0 (compatible; NotesZhihuImport/1.0)',
            'Accept': 'application/json'}
@@ -84,6 +85,12 @@ def upload_png(name, content, provider):
         url = 'https://img.scdn.io/api/v1.php'
         fields = {'outputFormat': 'png', 'cdn_domain': 'esaimg.cdn1.vip'}
         filefield = 'image'
+    elif provider == 'zjf':
+        # Anonymous public upload, 5 MiB per file and 10 images / IP / day.
+        # Explicitly disable server compression/watermarks; require original PNG fidelity.
+        url = 'https://zjf.ai/api/upload'
+        fields = {'compress': 'false', 'watermark': 'false', 'visibility': 'public'}
+        filefield = 'file'
     else:
         raise ValueError('Unknown provider')
     body, mime = multipart(fields, (filefield, name), content)
@@ -99,7 +106,7 @@ def upload_png(name, content, provider):
         link = (result.get('links') or {}).get('url')
     else:
         if not data.get('success'):
-            raise RuntimeError(f"SCDN refused upload: {str(data.get('message') or data.get('error'))[:180]}")
+            raise RuntimeError(f"{provider} refused upload: {str(data.get('message') or data.get('error'))[:180]}")
         link = data.get('url') or (data.get('data') or {}).get('url')
     return checked_url(link, provider)
 
@@ -162,7 +169,13 @@ def export(args):
     if path == output:
         raise ValueError('Refusing to overwrite source Markdown')
     source, images = load_source(path)
-    images = {name: fit_guest_limit(name, content) for name, content in images.items()}
+    if args.provider == 'czl':
+        images = {name: fit_guest_limit(name, content) for name, content in images.items()}
+    else:
+        # Preserve the full original image on hosts that allow much larger uploads.
+        # No palette quantization or downscaling.
+        if args.provider == 'zjf' and any(len(content) > 5_000_000 for content in images.values()):
+            raise ValueError('ZJF anonymous upload limit is 5 MB per image')
     print(f'Input validated: {len(images)} PNGs, {source.count("$$") // 2} block equations', flush=True)
     if not args.upload:
         print('Dry run only. Nothing uploaded.')
@@ -230,7 +243,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--input', type=Path, default=Path('dist/zhihu/uniform-continuity/article.md'))
     parser.add_argument('--output', type=Path)
-    parser.add_argument('--provider', choices=('czl', 'scdn'), default='czl')
+    parser.add_argument('--provider', choices=('zjf', 'czl', 'scdn'), default='czl')
     parser.add_argument('--upload', action='store_true', help='Explicitly upload publicly visible teaching PNGs')
     args = parser.parse_args()
     try:
