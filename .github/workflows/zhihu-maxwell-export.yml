@@ -96,10 +96,21 @@ jobs:
           print('PASS: 14 H2 chapters, 28 high-res screenshots, 12 expanded details, '
                 '151 display math (plus normalized single-$ display math), no external links')
           PY
+      - name: Number all images and prepare manual-entry Markdown
+        run: |
+          python3 scripts/package-zhihu-manual.py dist/zhihu/maxwell-equations --expected 28
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dist/zhihu/maxwell-equations-manual-package')
+          assert (p/'article.manual.md').read_text('utf-8').count('【插图 ') == 28
+          assert len(list((p/'images').glob('*.png')))==28
+          assert (p/'图片预览索引.html').is_file()
+          print('PASS: ready to import manual Markdown and 28 numbered images')
+          PY
       - name: Upload manual-import bundle
         uses: actions/upload-artifact@v4
         with:
-          name: maxwell-zhihu-offline-markdown
-          path: dist/zhihu/maxwell-equations/
+          name: maxwell-zhihu-manual-package
+          path: dist/zhihu/maxwell-equations-manual-package/
           retention-days: 5
           if-no-files-found: error
