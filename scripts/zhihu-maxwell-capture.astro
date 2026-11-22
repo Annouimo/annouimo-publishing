@@ -1,0 +1,42 @@
+---
+import TeachingFigure from '../components/TeachingFigure.astro';
+import MaxwellLab from '../components/MaxwellLab.astro';
+import '../../.shared-design/tokens.css';
+import '../styles/global.css';
+
+const kinds = [
+  'field', 'differential-plane', 'potential-slopes', 'potential',
+  'flux-plane', 'flux', 'divergence', 'volume-cancel', 'charge',
+  'curl', 'cancellation', 'forms', 'mixed-partials', 'boundary-square',
+  'gauss-sphere', 'gauss-cone', 'coupling', 'wave-shift',
+] as const;
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Offline teaching illustration capture</title>
+  <style is:global>
+    :root {color-scheme:light}
+    html,body {margin:0;padding:0;background:#faf9f5;color:var(--fg)}
+    main {width:800px;max-width:none;margin:0 auto;padding:12px 0 24px}
+    [data-capture] {width:800px;max-width:none;margin:0 0 48px;padding:8px 0}
+    .teaching-figure {margin-left:auto;margin-right:auto}
+    [data-capture="lab-field"],[data-capture="lab-capacitor"],[data-capture="lab-wave"]{padding:24px 20px;border:1px solid var(--border);background:#faf9f5}
+    svg {overflow:visible}
+  </style>
+</head>
+<body>
+<main>
+  {kinds.map(kind =>
+    <div data-capture={'teaching-'+kind}>
+      <TeachingFigure kind={kind}/>
+    </div>
+  )}
+  <div data-capture="lab-field"><MaxwellLab kind="field"/></div>
+  <div data-capture="lab-capacitor"><MaxwellLab kind="capacitor"/></div>
+  <div data-capture="lab-wave"><MaxwellLab kind="wave"/></div>
+</main>
+</body>
+</html>

@@ -1,0 +1,116 @@
+name: Maxwell Zhihu offline image and Markdown export
+on:
+  push:
+    branches:
+      - experiment/zhihu-markdown-export
+    paths:
+      - .github/workflows/zhihu-maxwell-export.yml
+      - scripts/render-zhihu-maxwell.mjs
+      - scripts/export-zhihu-maxwell.py
+      - scripts/zhihu-maxwell-capture.astro
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install fonts and browser tooling
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+          npm ci
+          npm install --no-save playwright-core
+          which google-chrome || which google-chrome-stable || which chromium
+      - name: Fetch locked original notes and create local-only capture route
+        run: |
+          npm run prepare:content
+          cp scripts/zhihu-maxwell-capture.astro src/pages/zhihu-capture-offline.astro
+      - name: Start isolated local Astro rendering server
+        run: |
+          cat > astro-zhihu.config.mjs <<'EOF'
+          import { defineConfig } from 'astro/config';
+          export default defineConfig({output:'static', devToolbar:{enabled:false}, server: {host:'127.0.0.1', port:4321}});
+          EOF
+          ./node_modules/.bin/astro dev --config ./astro-zhihu.config.mjs --host 127.0.0.1 --port 4321 > /tmp/zhihu-astro.log 2>&1 &
+          echo $! > /tmp/zhihu-astro.pid
+          for i in $(seq 1 50); do
+            if curl --fail --silent --connect-timeout 2 --max-time 6 'http://127.0.0.1:4321/zhihu-capture-offline' -o /tmp/zhihu-page.html; then
+              echo "Isolated Astro capture page is ready"
+              exit 0
+            fi
+            if (( i % 10 == 0 )); then
+              echo "Waiting for local capture route... attempt $i"
+              tail -25 /tmp/zhihu-astro.log
+            fi
+            sleep 2
+          done
+          echo "Local Astro capture page unavailable"
+          tail -160 /tmp/zhihu-astro.log
+          exit 1
+      - name: Capture all source SVGs and all three lab scenarios
+        run: |
+          node scripts/render-zhihu-maxwell.mjs
+      - name: Export strictly validated Markdown and image order
+        run: |
+          python3 scripts/export-zhihu-maxwell.py
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, struct, json
+          folder=Path('dist/zhihu/maxwell-equations')
+          md=(folder/'article.md').read_text('utf-8')
+          original=Path('src/content/notes/maxwell-equations/index.mdx').read_text('utf-8')
+          paths=re.findall(r'!\[[^\]\n]*\]\((images/[^)]+\.png)\)', md)
+          assert len(paths)==28 and len(set(paths))==28
+          assert len(re.findall(r'^## ', md, re.M)) == len(re.findall(r'^## ', original, re.M)) == 14
+          assert md.count('$$') == original.count('$$')+2
+          assert original.count('<details>')==12
+          assert not re.search(r'annouimo|https?://|github\.com|博客地址|个人网站',md,re.I)
+          for rel in paths:
+            p=folder/rel
+            data=p.read_bytes()
+            assert data[:8]==b'\x89PNG\r\n\x1a\n'
+            w,h=struct.unpack('>II',data[16:24])
+            assert min(w,h)>=400, (p,w,h)
+          info=json.loads((folder/'screenshots.json').read_text('utf-8'))
+          assert len(info['figures'])==18
+          assert sum(len(l['states']) for l in info['labs'].values())==10
+          (folder/'IMAGE_ORDER.txt').write_text('\n'.join(f'{i:02d}. {rel}' for i,rel in enumerate(paths,1))+'\n',encoding='utf-8')
+          (folder/'README.txt').write_text(
+            '知乎麦克斯韦讲义离线导入包\n\n'
+            '1. article.md 保留全部章节、数学公式与图文位置。\n'
+            '2. images/ 下有 28 张原画质高 DPI PNG。\n'
+            '3. 知乎只上传 md 时不会读取本地 images/ 相对路径；如使用手动插图，'
+            '请依照 IMAGE_ORDER.txt 的顺序从 images/ 插图。\n'
+            '4. 请保存草稿、刷新、核对图片和公式后再正式发布。\n'
+            '5. 这是离线制作包，不包含任何个人网站相关信息，也没有执行自动发布。\n',
+            encoding='utf-8')
+          print('PASS: 14 H2 chapters, 28 high-res screenshots, 12 expanded details, '
+                '151 display math (plus normalized single-$ display math), no external links')
+          PY
+      - name: Number all images and prepare manual-entry Markdown
+        run: |
+          python3 scripts/package-zhihu-manual.py dist/zhihu/maxwell-equations --expected 28
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('dist/zhihu/maxwell-equations-manual-package')
+          assert (p/'article.manual.md').read_text('utf-8').count('【插图 ') == 28
+          assert len(list((p/'images').glob('*.png')))==28
+          assert (p/'图片预览索引.html').is_file()
+          print('PASS: ready to import manual Markdown and 28 numbered images')
+          PY
+      - name: Upload manual-import bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: maxwell-zhihu-manual-package
+          path: dist/zhihu/maxwell-equations-manual-package/
+          retention-days: 5
+          if-no-files-found: error
