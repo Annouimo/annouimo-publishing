@@ -15,8 +15,9 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 HOST_URL = 'https://litterbox.catbox.moe/resources/internals/api.php'
-IMAGE_HOSTS = {'litterbox': 'files.catbox.moe', '0x0': '0x0.st'}
+IMAGE_HOSTS = {'litterbox': 'files.catbox.moe', '0x0': '0x0.st', 'pomf': 'pomf2.lain.la'}
 ZEROX_URL = 'https://0x0.st'
+POMF_URL = 'https://pomf.lain.la/upload.php'
 EXPECTED = {'sine.png', 'square.png', 'root.png', 'oscillation.png',
             'damped.png', 'inverse.png', 'chirp.png'}
 IMAGE_RE = re.compile(r'!\[([^\]\n]*)\]\((images/([a-z]+\.png))\)')
@@ -36,7 +37,7 @@ def check_url(url, provider):
     p = urlsplit(url)
     if (p.scheme != 'https' or p.hostname != IMAGE_HOSTS[provider] or p.username or
             p.password or p.port or p.query or p.fragment or
-            not re.fullmatch(r'/[A-Za-z0-9_-]+\.png', p.path)):
+            not re.fullmatch(r'/(?:f/)?[A-Za-z0-9_-]+\.png', p.path)):
         raise ValueError(f'Unexpected image-host URL: {url!r}')
     return url
 
@@ -71,10 +72,10 @@ def multipart_png(filename, payload, expiry):
     return body, f'multipart/form-data; boundary={boundary}'
 
 
-def multipart_0x0(name, payload):
+def multipart_0x0(name, payload, field='file'):
     boundary = '----ZhihuTemp' + uuid.uuid4().hex
     body = (f'--{boundary}\r\nContent-Disposition: form-data; '
-            f'name="file"; filename="{name}"\r\n'
+            f'name="{field}"; filename="{name}"\r\n'
             f'Content-Type: image/png\r\n\r\n').encode()
     body += payload + f'\r\n--{boundary}--\r\n'.encode()
     return body, f'multipart/form-data; boundary={boundary}'
@@ -84,6 +85,9 @@ def upload_image(name, data, expiry, provider):
     if provider == '0x0':
         body, content_type = multipart_0x0(name, data)
         endpoint = ZEROX_URL
+    elif provider == 'pomf':
+        body, content_type = multipart_0x0(name, data, field='files[]')
+        endpoint = POMF_URL
     else:
         body, content_type = multipart_png(name, data, expiry)
         endpoint = HOST_URL
@@ -91,7 +95,14 @@ def upload_image(name, data, expiry, provider):
         headers={'Content-Type': content_type, 'User-Agent': 'ZhihuNotesOfflineExport/1.0'},
         method='POST')
     with urllib.request.urlopen(request, timeout=50) as response:
-        url = response.read(1024).decode('utf-8').strip()
+        raw = response.read(32768).decode('utf-8').strip()
+    if provider == 'pomf':
+        payload = json.loads(raw)
+        if not payload.get('success') or not payload.get('files'):
+            raise ValueError(f'Upload declined: {raw[:200]}')
+        url = payload['files'][0]['url']
+    else:
+        url = raw
     return check_url(url, provider)
 
 
@@ -137,7 +148,7 @@ def rewrite(markdown, urls, provider):
     result = IMAGE_RE.sub(replacement, markdown)
     if result.count('https://' + IMAGE_HOSTS[provider] + '/') != 7:
         raise ValueError('Incorrect number of hosted image links')
-    without_images = re.sub(r'!\[[^\]\n]*\]\((?:images/[^)]+|https://(?:files\.catbox\.moe|0x0\.st)/[^)]+)\)', '', result)
+    without_images = re.sub(r'!\[[^\]\n]*\]\((?:images/[^)]+|https://(?:files\.catbox\.moe|0x0\.st|pomf2\.lain\.la)/[^)]+)\)', '', result)
     if PRIVATE_RE.search(without_images) or re.search(r'!\[[^\]]*\]\(images/', result):
         raise ValueError('Unconverted links or personal-site reference remains')
     return result
@@ -147,7 +158,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--input', type=Path, default=Path('dist/zhihu/uniform-continuity/article.md'))
     parser.add_argument('--output', type=Path, default=None)
-    parser.add_argument('--provider', choices=('0x0','litterbox'), default='0x0')
+    parser.add_argument('--provider', choices=('pomf','0x0','litterbox'), default='pomf')
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--upload', action='store_true', help='Upload seven images anonymously; external network access')
     mode.add_argument('--reuse', action='store_true', help='Reuse already uploaded images from a manifest')
