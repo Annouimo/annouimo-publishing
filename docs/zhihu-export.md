@@ -22,7 +22,7 @@ dist/.venv-zhihu/bin/python scripts/host-zhihu-cn-images.py --provider czl --upl
 
 最终使用 `dist/zhihu/uniform-continuity/article.zhihu-cn.md` 手工导入知乎。图片临时放在 CZL 图床，真实直链域名为 `i.czl.net`。如果之前已经上传过同一张图片，脚本会先下载、校验完整性后复用，否则上传。
 
-已有的国外图床上传脚本 `scripts/host-zhihu-images.py` 和原始 Markdown 在当前实验分支中保留作为对照；**不建议在中国大陆发布测试中使用国外图床链接**。
+此前实验用的国外图床上传脚本已弃用并从分支中移除，避免误用；原始离线 Markdown 仍保留在生成目录中供验收。
 
 ## 保护与验收
 
