@@ -36,7 +36,7 @@ jobs:
           import re
           p = Path('dist/zhihu/uniform-continuity/article.zhihu.md')
           text = p.read_text(encoding='utf-8')
-          assert len(re.findall(r'!\[[^\]]*\]\(https://pomf2\.lain\.la/f//[^)]+\.png\)', text)) == 7
+          assert len(re.findall(r'!\[[^\]]*\]\(https://pomf2\.lain\.la/f/[^)]+\.png\)', text)) == 7
           assert len(re.findall(r'^## ', text, flags=re.M)) == 9
           assert text.count('$$') == 12
           assert not re.search('annouimo|github\\.com|blog\\.|learn\\.', text, re.I)
