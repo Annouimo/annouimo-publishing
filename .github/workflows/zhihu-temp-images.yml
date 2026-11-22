@@ -28,7 +28,7 @@ jobs:
           python3 scripts/host-zhihu-images.py
       - name: Upload static PNGs to temporary image host
         run: |
-          python3 scripts/host-zhihu-images.py --upload --provider 0x0
+          python3 scripts/host-zhihu-images.py --upload --provider pomf
       - name: Final Markdown validation
         run: |
           python3 - <<'PY'
@@ -36,7 +36,7 @@ jobs:
           import re
           p = Path('dist/zhihu/uniform-continuity/article.zhihu.md')
           text = p.read_text(encoding='utf-8')
-          assert len(re.findall(r'!\[[^\]]*\]\(https://0x0\.st/[^)]+\.png\)', text)) == 7
+          assert len(re.findall(r'!\[[^\]]*\]\(https://pomf2\.lain\.la/f//[^)]+\.png\)', text)) == 7
           assert len(re.findall(r'^## ', text, flags=re.M)) == 9
           assert text.count('$$') == 12
           assert not re.search('annouimo|github\\.com|blog\\.|learn\\.', text, re.I)
@@ -48,6 +48,6 @@ jobs:
           name: zhihu-manual-import
           path: |
             dist/zhihu/uniform-continuity/article.zhihu.md
-            dist/zhihu/uniform-continuity/hosted-images-0x0.json
+            dist/zhihu/uniform-continuity/hosted-images-pomf.json
           retention-days: 3
           if-no-files-found: error
