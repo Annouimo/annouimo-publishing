@@ -11,11 +11,11 @@
 npm run prepare:content
 
 # 为导出功能准备独立 Python 环境
-python3 -m venv .venv-zhihu
-.venv-zhihu/bin/python -m pip install numpy matplotlib
+python3 -m venv dist/.venv-zhihu
+dist/.venv-zhihu/bin/python -m pip install numpy matplotlib
 
 # 生成 article.md + images/*.png
-.venv-zhihu/bin/python scripts/export-zhihu.py
+dist/.venv-zhihu/bin/python scripts/export-zhihu.py
 ```
 
 输出位置：`dist/zhihu/uniform-continuity/`。也可使用 `--source` 和 `--output` 指定路径。
