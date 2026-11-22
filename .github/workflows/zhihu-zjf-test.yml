@@ -1,0 +1,55 @@
+name: Zhihu ZJF original-image CDN import experiment
+on:
+  push:
+    branches:
+      - experiment/zhihu-markdown-export
+    paths:
+      - .github/workflows/zhihu-zjf-test.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  upload-and-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install plotting dependencies and fetch pinned notes
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
+          python3 -m pip install --user numpy matplotlib pillow
+          bash scripts/import-notes.sh
+      - name: Generate original-quality PNG diagrams
+        run: |
+          python3 scripts/export-zhihu.py
+          python3 -m py_compile scripts/host-zhihu-cn-images.py
+          python3 scripts/host-zhihu-cn-images.py --provider zjf
+      - name: Anonymous upload to ZJF without any image compression
+        run: |
+          python3 scripts/host-zhihu-cn-images.py --provider zjf --upload \
+            --output dist/zhihu/uniform-continuity/article.zhihu-zjf.md
+      - name: Verify that only image URLs changed
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          folder=Path('dist/zhihu/uniform-continuity')
+          md=(folder/'article.zhihu-zjf.md').read_text('utf-8')
+          original=(folder/'article.md').read_text('utf-8')
+          imgs=re.findall(r'!\[[^\]\n]*\]\((https://img\.zjf\.ai/[^)]+\.png)\)',md)
+          assert len(imgs)==7, imgs
+          assert len(re.findall(r'^## ',md,flags=re.M))==9
+          assert md.count('$$')==12
+          assert not re.search(r'annouimo|github\.com|blog\.|learn\.|个人网站|阅读原文',md,re.I)
+          print('ZJF Markdown validated: 7 image URLs, 9 sections, 6 display maths, no personal-site links.')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zhihu-zjf-original-images
+          path: |
+            dist/zhihu/uniform-continuity/article.zhihu-zjf.md
+            dist/zhihu/uniform-continuity/hosted-images-zjf.json
+          retention-days: 3
+          if-no-files-found: error
