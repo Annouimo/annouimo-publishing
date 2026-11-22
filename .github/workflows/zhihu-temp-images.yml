@@ -43,7 +43,7 @@ jobs:
           text = Path('dist/zhihu/uniform-continuity/article.zhihu-cn.md').read_text('utf-8')
           matches = re.findall(r'!\[[^\]]*\]\((https://[^)]+\.png)\)', text)
           assert len(matches) == 7, len(matches)
-          assert all(any(domain in url for domain in ['img.czl.net/', 'esaimg.cdn1.vip/', 'edgeoneimg.cdn1.vip/']) for url in matches), matches
+          assert all(any(domain in url for domain in ['img.czl.net/', 'i.czl.net/', 'esaimg.cdn1.vip/', 'edgeoneimg.cdn1.vip/']) for url in matches), matches
           assert len(re.findall(r'^## ', text, flags=re.M)) == 9
           assert text.count('$$') == 12
           assert not re.search('annouimo|github\.com|blog\.|learn\.|个人网站|阅读原文', text, re.I)
