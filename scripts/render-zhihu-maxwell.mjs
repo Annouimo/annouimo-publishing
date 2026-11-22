@@ -81,7 +81,11 @@ try {
   const overlays = await page.evaluate(() => [...document.querySelectorAll('vite-error-overlay')]
     .map(el => el.shadowRoot?.textContent?.slice(0, 1500) || 'overlay without readable text'));
   for (const item of overlays) process.stderr.write('Vite overlay: ' + item + '\n');
-  await page.addStyleTag({content: 'vite-error-overlay { display: none !important; pointer-events: none !important }'});
+  await page.addStyleTag({content: 'vite-error-overlay, astro-dev-toolbar, astro-dev-toolbar-dialog { display: none !important; pointer-events: none !important }'});
+  await page.evaluate(() => {
+    document.querySelectorAll('vite-error-overlay, astro-dev-toolbar, astro-dev-toolbar-dialog')
+      .forEach(el => el.remove());
+  });
 
   const metadata = {figures: {}, labs: {}};
   for (const kind of figureKinds) {
