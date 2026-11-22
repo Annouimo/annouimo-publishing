@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build a standalone Zhihu Markdown with anonymous, temporary HTTPS image URLs.
 
-This script never publishes to Zhihu. Network upload is opt-in (--upload), uses\n0x0.st by default (Litterbox remains optional), and checks downloaded image bytes.
+This script never publishes to Zhihu. Network upload is opt-in (--upload), uses\nPomf by default (0x0.st and Litterbox optional), and verifies downloaded bytes.
 """
 import argparse
 import hashlib
