@@ -1,39 +1,46 @@
-# 知乎讲义 Markdown 导出与图片暂存
+# 知乎讲义导出：先完整转换，再人工验收与发布
 
-本流程只处理讲义，不连接知乎账号，也不进行自动发布。目前实验对象是《如何理解一致连续？》，实验分支为 `experiment/zhihu-markdown-export`。正式博客不受影响。
+该功能仅位于 `experiment/zhihu-markdown-export` 实验分支，**不连接知乎账号、不自动发布、不修改博客生产环境**。知乎文章只保留讲义本身，不含个人主页、博客、GitHub、原文地址或引流说明。
 
-## 操作
+## 当前采用的流程：手动插图
+
+《麦克斯韦方程组》讲义保留全部数学内容。源文件来自 `notes.lock` 指向的 `annouimo-notes` MDX。全部教学图直接从原有 Astro 组件浏览器渲染导出，不另起一套不一定准确的绘图代码。
 
 ```bash
-# 在 annouimo-publishing 根目录
-bash scripts/import-notes.sh
-python3 -m venv dist/.venv-zhihu
-dist/.venv-zhihu/bin/python -m pip install numpy matplotlib
+# annouimo-publishing 根目录，在已有 Node 24 环境中
+npm ci
+npm install --no-save playwright-core
+npm run prepare:content
 
-# 先生成离线原稿和七张静态图
-dist/.venv-zhihu/bin/python scripts/export-zhihu.py
-
-# 先做不联网的结构检查
-dist/.venv-zhihu/bin/python scripts/host-zhihu-cn-images.py
-
-# 实际匿名上传七张图片（每分钟至多五张，脚本自动分批）
-dist/.venv-zhihu/bin/python scripts/host-zhihu-cn-images.py --provider czl --upload
+# 临时将 scripts/zhihu-maxwell-capture.astro
+# 复制到 src/pages/zhihu-capture-offline.astro，
+# 启动带 devToolbar:{enabled:false} 的独立本地 Astro 服务
+# 然后截图。推荐直接使用本分支的 GitHub Actions 工作流进行重现。
+node scripts/render-zhihu-maxwell.mjs
+python3 scripts/export-zhihu-maxwell.py
+python3 scripts/package-zhihu-manual.py dist/zhihu/maxwell-equations --expected 28
 ```
 
-最终使用 `dist/zhihu/uniform-continuity/article.zhihu-cn.md` 手工导入知乎。图片临时放在 CZL 图床，真实直链域名为 `i.czl.net`。如果之前已经上传过同一张图片，脚本会先下载、校验完整性后复用，否则上传。
+成功后，`dist/zhihu/maxwell-equations-manual.zip` 包含：
 
-此前实验用的国外图床上传脚本已弃用并从分支中移除，避免误用；原始离线 Markdown 仍保留在生成目录中供验收。
+- `article.manual.md`：知乎手动导入用，带插图 01—28 的明确占位标记。
+- `images/`：28 张以 01—28 编号的高清 PNG；分别是 18 张原始 SVG 和 10 张交互关键状态。
+- `article.md`：完整标准 Markdown，保留本地相对图片路径，方便离线预览和未来转换。
+- `插图顺序.txt`、`图片预览索引.html`、`使用说明.txt`。
 
-## 保护与验收
+**手动导入的操作：** 在知乎新建文章 → 导入 `article.manual.md` → 从 `images/` 依编号上传图片 → 确认插入成功后删掉占位提示 → 保存草稿、刷新检查全部图片、数学公式、章节 → 人工决定是否发表。
 
-- 只上传七张公开数学图，不上传 Markdown 正文，不联系知乎 API。
-- 输出的知乎正文**不含**个人网站、GitHub、博客域名、作者介绍或“阅读原文”引流信息。导出器发现疑似个人信息或额外链接即拒绝继续。
-- 正文内容和 LaTeX 不作更改；只有 Markdown 图片链接从 `images/*.png` 换成 HTTPS 图床直链。
-- 导出结构含九个二级标题、六处块公式、七张插图。
-- CZL 游客限制每分钟最多上传五张，脚本会暂停后继续；如果单张 PNG 太大，会自动转换为约 256 色调色板 PNG，保持原始像素尺寸。
-- 上传后重新从图片直链下载图片，与**实际上传的 PNG** 比对 SHA-256；若托管服务重新编码，则核对图像像素及尺寸。
-- 实际测试（2026-11-22）：<https://github.com/Annouimo/annouimo-publishing/actions/runs/44977577743>，七张图片全部上传并校验成功，Markdown 通过自动结构检查。
-- 该记录只能证明 GitHub Actions 运行器的上传及访问成功；**不能代替中国大陆网络和知乎编辑器的实测**。
-- CZL 提供 `expired_seconds=259200`（72 小时）请求参数，但游客组有权覆盖保留期；**不承诺确切保留时间**。请尽快导入，先保存草稿、刷新检查并验证图像已经转存到知乎自己的图片域名；如果仍是 `i.czl.net`，不要依赖临时图床长期公开发布。
+## 内容验收
 
-实验分支尚未合入 `main`，也不修改已部署的网站。
+- 14 个二级章节、12 处折叠解释完整保留；把 1 处单独的单美元符号公式修正为块公式分隔符。
+- 18 个 `TeachingFigure` 图准确提取原组件 SVG，独立保存 PNG；标题和图注仍以 Markdown 正文形式出现。
+- 三个 `MaxwellLab` 的状态按数学意图展开：矢量场五种、电容器两种、电磁波三种，合计 10 张。
+- 禁止未转换的 MDX 标签；全部 28 张图必须存在于 Markdown 原位，图片相对路径完整可读。
+- 使用无悬浮开发工具栏的独立截图页面，2× 像素比截图；按实际导出的 PNG 做人工视觉验收。
+- 全程不登录知乎，也没有将文章或图片上传外部图床。
+
+## 以后再决定图床
+
+公共图床和自建图床的选择**暂时搁置**。之前的上传适配脚本 `scripts/host-zhihu-cn-images.py` 只是既往实验，不属于当前默认流程；不能让其上传额度、图片压缩或中国大陆连通性反过来决定讲义画质。
+
+《一致连续》已有的 Markdown 导出脚本继续保留，先不再调整该篇。
