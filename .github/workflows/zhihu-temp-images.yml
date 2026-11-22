@@ -1,0 +1,52 @@
+name: Zhihu temporary-image upload test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - experiment/zhihu-markdown-export
+    paths:
+      - .github/workflows/zhihu-temp-images.yml
+
+permissions:
+  contents: read
+
+jobs:
+  export-and-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare source and plotting dependencies
+        run: |
+          python3 -m pip install --user numpy matplotlib
+          bash scripts/import-notes.sh
+      - name: Generate and validate Markdown
+        run: |
+          python3 scripts/export-zhihu.py
+          python3 scripts/host-zhihu-images.py
+      - name: Upload static PNGs to temporary image host
+        run: |
+          python3 scripts/host-zhihu-images.py --upload
+      - name: Final Markdown validation
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('dist/zhihu/uniform-continuity/article.zhihu.md')
+          text = p.read_text(encoding='utf-8')
+          assert len(re.findall(r'!\[[^\]]*\]\(https://files\.catbox\.moe/[^)]+\.png\)', text)) == 7
+          assert len(re.findall(r'^## ', text, flags=re.M)) == 9
+          assert text.count('$$') == 12
+          assert not re.search('annouimo|github\\.com|blog\\.|learn\\.', text, re.I)
+          print('Validated seven remote PNGs, 9 headings, 6 block equations and no personal-site references.')
+          PY
+      - name: Save manual-import Markdown
+        uses: actions/upload-artifact@v4
+        with:
+          name: zhihu-manual-import
+          path: |
+            dist/zhihu/uniform-continuity/article.zhihu.md
+            dist/zhihu/uniform-continuity/hosted-images.json
+          retention-days: 3
+          if-no-files-found: error
