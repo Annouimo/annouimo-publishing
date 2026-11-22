@@ -19,6 +19,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Prepare source and plotting dependencies
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
           python3 -m pip install --user numpy matplotlib
           bash scripts/import-notes.sh
       - name: Generate and validate Markdown
@@ -27,7 +28,7 @@ jobs:
           python3 scripts/host-zhihu-images.py
       - name: Upload static PNGs to temporary image host
         run: |
-          python3 scripts/host-zhihu-images.py --upload
+          python3 scripts/host-zhihu-images.py --upload --provider 0x0
       - name: Final Markdown validation
         run: |
           python3 - <<'PY'
@@ -47,6 +48,6 @@ jobs:
           name: zhihu-manual-import
           path: |
             dist/zhihu/uniform-continuity/article.zhihu.md
-            dist/zhihu/uniform-continuity/hosted-images.json
+            dist/zhihu/uniform-continuity/hosted-images-0x0.json
           retention-days: 3
           if-no-files-found: error
