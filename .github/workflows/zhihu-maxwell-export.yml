@@ -5,6 +5,9 @@ on:
       - experiment/zhihu-markdown-export
     paths:
       - .github/workflows/zhihu-maxwell-export.yml
+      - scripts/render-zhihu-maxwell.mjs
+      - scripts/export-zhihu-maxwell.py
+      - scripts/zhihu-maxwell-capture.astro
   workflow_dispatch:
 
 permissions:
