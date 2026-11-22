@@ -1,4 +1,4 @@
-name: Zhihu temporary-image upload test
+name: Test Zhihu Markdown import with mainland-facing image CDN
 
 on:
   workflow_dispatch:
@@ -17,37 +17,44 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Prepare source and plotting dependencies
+      - name: Install plot and CJK font dependencies
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
           python3 -m pip install --user numpy matplotlib
           bash scripts/import-notes.sh
-      - name: Generate and validate Markdown
+      - name: Generate offline Markdown with seven images
         run: |
           python3 scripts/export-zhihu.py
-          python3 scripts/host-zhihu-images.py
-      - name: Upload static PNGs to temporary image host
+          python3 -m py_compile scripts/host-zhihu-cn-images.py
+          python3 scripts/host-zhihu-cn-images.py
+      - name: Try domestic-facing image hosting
         run: |
-          python3 scripts/host-zhihu-images.py --upload --provider pomf
-      - name: Final Markdown validation
+          if python3 scripts/host-zhihu-cn-images.py --provider czl --upload; then
+            echo 'CZL worked'
+          else
+            echo 'CZL unavailable; testing mainland ESA CDN'
+            python3 scripts/host-zhihu-cn-images.py --provider scdn --upload
+          fi
+      - name: Validate standalone MD
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import re
-          p = Path('dist/zhihu/uniform-continuity/article.zhihu.md')
-          text = p.read_text(encoding='utf-8')
-          assert len(re.findall(r'!\[[^\]]*\]\(https://pomf2\.lain\.la/f/[^)]+\.png\)', text)) == 7
+          text = Path('dist/zhihu/uniform-continuity/article.zhihu-cn.md').read_text('utf-8')
+          matches = re.findall(r'!\[[^\]]*\]\((https://[^)]+\.png)\)', text)
+          assert len(matches) == 7, len(matches)
+          assert all(any(domain in url for domain in ['img.czl.net/', 'esaimg.cdn1.vip/', 'edgeoneimg.cdn1.vip/']) for url in matches), matches
           assert len(re.findall(r'^## ', text, flags=re.M)) == 9
           assert text.count('$$') == 12
-          assert not re.search('annouimo|github\\.com|blog\\.|learn\\.', text, re.I)
-          print('Validated seven remote PNGs, 9 headings, 6 block equations and no personal-site references.')
+          assert not re.search('annouimo|github\.com|blog\.|learn\.|个人网站|阅读原文', text, re.I)
+          print('Validated: 7 external PNGs, 9 headings, 6 display equations, 0 personal links')
           PY
-      - name: Save manual-import Markdown
+      - name: Save Markdown artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zhihu-manual-import
+          name: zhihu-mainland-image-md
           path: |
-            dist/zhihu/uniform-continuity/article.zhihu.md
-            dist/zhihu/uniform-continuity/hosted-images-pomf.json
+            dist/zhihu/uniform-continuity/article.zhihu-cn.md
+            dist/zhihu/uniform-continuity/hosted-images-*.json
           retention-days: 3
           if-no-files-found: error
