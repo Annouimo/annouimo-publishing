@@ -5,7 +5,7 @@
  * PNGs plus associated figure headings/captions. No uploads or site links.
  *
  * Usage:
- *   ZHIHU_CAPTURE_URL=http://127.0.0.1:4321/__zhihu_capture \
+ *   ZHIHU_CAPTURE_URL=http://127.0.0.1:4321/zhihu-capture-offline \
  *   node scripts/render-zhihu-maxwell.mjs
  */
 import { chromium } from 'playwright-core';
@@ -26,7 +26,7 @@ const labStates = {
 };
 const output = path.resolve(process.env.ZHIHU_OUTPUT || 'dist/zhihu/maxwell-equations');
 const imageDir = path.join(output, 'images');
-const url = process.env.ZHIHU_CAPTURE_URL || 'http://127.0.0.1:4321/__zhihu_capture';
+const url = process.env.ZHIHU_CAPTURE_URL || 'http://127.0.0.1:4321/zhihu-capture-offline';
 
 function getChrome() {
   if (process.env.CHROME_BIN) return process.env.CHROME_BIN;
