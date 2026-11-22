@@ -158,6 +158,7 @@ def export(args):
         manifest = {'provider': args.provider, 'images': {}}
 
     urls = {}
+    uploads_this_batch = 0
     for name in sorted(images):
         record = manifest['images'].get(name, {})
         if record.get('sha256') == sha(images[name]):
@@ -168,8 +169,22 @@ def export(args):
                 continue
             except (KeyError, ValueError, OSError, RuntimeError):
                 pass
+        if args.provider == 'czl' and uploads_this_batch >= 5:
+            print('CZL anonymous rate limit: waiting 65 s before next batch...', flush=True)
+            time.sleep(65)
+            uploads_this_batch = 0
         print('Uploading:', name, flush=True)
-        link = upload_png(name, images[name], args.provider)
+        for retry in range(2):
+            try:
+                link = upload_png(name, images[name], args.provider)
+                uploads_this_batch += 1
+                break
+            except RuntimeError as exc:
+                if args.provider != 'czl' or retry or ('每分钟' not in str(exc) and 'HTTP 429' not in str(exc)):
+                    raise
+                print('CZL reported rate limit; waiting 65 s and retrying...', flush=True)
+                time.sleep(65)
+                uploads_this_batch = 0
         integrity = verify_png(link, images[name], args.provider)
         print('Verified:', name, integrity, link, flush=True)
         urls[name] = link
