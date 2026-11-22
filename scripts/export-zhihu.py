@@ -107,21 +107,21 @@ def draw(kind: str, output: Path):
 
 def export(source: Path, out: Path):
     raw=source.read_text(encoding='utf-8')
-    head=re.match(r'\\A---\\s*\\n(.*?)\\n---\\s*\\n',raw,re.S)
+    head=re.match(r'\A---\s*\n(.*?)\n---\s*\n',raw,re.S)
     if head is None: raise ValueError('Missing MDX frontmatter')
-    title_match=re.search(r'^title:\\s*(.+?)\\s*$',head.group(1),re.M)
+    title_match=re.search(r'^title:\s*(.+?)\s*$',head.group(1),re.M)
     if title_match is None: raise ValueError('Missing title')
-    title=title_match.group(1).strip().strip('"\\'')
+    title=title_match.group(1).strip().strip('"\'')
     body=raw[head.end():]
-    body=re.sub(r'^import\\s+.*?;\\s*$', '', body, flags=re.M)
+    body=re.sub(r'^import\s+.*?;\s*$', '', body, flags=re.M)
     for before,after in TEXT_ADAPTATIONS.items():
         if before not in body: raise ValueError('Expected adaptation anchor not found: '+before[:55])
         body=body.replace(before,after,1)
-    details=re.compile(r'<details>\\s*<summary>(.*?)</summary>\\s*(.*?)\\s*</details>',re.S)
-    body,count=details.subn(lambda m:'\\n**'+m.group(1).strip()+'**\\n\\n'+m.group(2).strip()+'\\n',body)
+    details=re.compile(r'<details>\s*<summary>(.*?)</summary>\s*(.*?)\s*</details>',re.S)
+    body,count=details.subn(lambda m:'\n**'+m.group(1).strip()+'**\n\n'+m.group(2).strip()+'\n',body)
     if count!=4: raise ValueError(f'Expected 4 expanded details, got {count}')
     seen=[]
-    component=re.compile(r'<ContinuityBox\\s+kind="([\\w-]+)"\\s*/>')
+    component=re.compile(r'<ContinuityBox\s+kind="([\w-]+)"\s*/>')
     def replace_component(match):
         kind=match.group(1)
         if kind not in SCENES: raise ValueError('Unknown figure: '+kind)
@@ -130,12 +130,12 @@ def export(source: Path, out: Path):
         return f'![{SCENES[kind][0]} 的固定小框比较图](images/{kind}.png)'
     body=component.sub(replace_component,body)
     if set(seen)!=set(SCENES): raise ValueError(f'Figures differ from expected: {seen}')
-    if re.search(r'(?m)^\\s*<\\/?[A-Za-z][^>]*>',body): raise ValueError('Unconverted HTML / MDX element remains')
-    if re.search(r'(?i)(?:https?://|www\\.|annouimo|why.notes|github\\.com|博客|个人网站)',body):
+    if re.search(r'(?m)^\s*<\/?[A-Za-z][^>]*>',body): raise ValueError('Unconverted HTML / MDX element remains')
+    if re.search(r'(?i)(?:https?://|www\.|annouimo|why.notes|github\.com|博客|个人网站)',body):
         raise ValueError('External/personal-site reference found')
     out.mkdir(parents=True,exist_ok=True)
     for kind in seen: draw(kind,out/'images'/f'{kind}.png')
-    document='# '+title+'\\n\\n'+body.strip()+'\\n'
+    document='# '+title+'\n\n'+body.strip()+'\n'
     (out/'article.md').write_text(document,encoding='utf-8')
     return out/'article.md'
 
