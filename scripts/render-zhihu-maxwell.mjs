@@ -127,7 +127,7 @@ try {
   const waveFootnote = textOrThrow(await wave.locator('.lab-footnote').innerText(), 'wave footnote');
   const waveStates = [];
   const slider = wave.locator('input[data-phase]');
-  for (const [id, phase] of [['phase-0', '0'], ['phase-1', '1.57'], ['phase-2', '3.14']]) {
+  for (const [id, phase] of [['phase-0', '0'], ['phase-1', '1.55'], ['phase-2', '3.15']]) {
     await slider.evaluate((input, value) => {
       input.value = value;
       input.dispatchEvent(new Event('input', {bubbles: true}));
