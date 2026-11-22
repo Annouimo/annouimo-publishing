@@ -120,6 +120,23 @@ def verify_png(url, original, provider):
     return 'identical pixels'
 
 
+def fit_guest_limit(name, png_bytes):
+    """Palettize unusually large charts; preserve their full pixel dimensions."""
+    if len(png_bytes) <= 100_000:
+        return png_bytes
+    from PIL import Image
+    image = Image.open(io.BytesIO(png_bytes)).convert('RGB')
+    palette = image.quantize(colors=256, method=Image.Quantize.MEDIANCUT,
+                             dither=Image.Dither.NONE)
+    output = io.BytesIO()
+    palette.save(output, format='PNG', optimize=True, compress_level=9)
+    result = output.getvalue()
+    if len(result) > 100_000:
+        raise ValueError(f'Image still exceeds anonymous upload limit: {name} ({len(result)} bytes)')
+    print(f'Compressed {name}: {len(png_bytes)} -> {len(result)} bytes; dimensions unchanged', flush=True)
+    return result
+
+
 def load_source(path):
     source = path.read_text(encoding='utf-8')
     if SOURCE_DENY.search(source):
@@ -145,6 +162,7 @@ def export(args):
     if path == output:
         raise ValueError('Refusing to overwrite source Markdown')
     source, images = load_source(path)
+    images = {name: fit_guest_limit(name, content) for name, content in images.items()}
     print(f'Input validated: {len(images)} PNGs, {source.count("$$") // 2} block equations', flush=True)
     if not args.upload:
         print('Dry run only. Nothing uploaded.')
