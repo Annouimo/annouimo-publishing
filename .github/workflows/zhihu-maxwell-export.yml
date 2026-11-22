@@ -31,18 +31,27 @@ jobs:
         run: |
           npm run prepare:content
           cp scripts/zhihu-maxwell-capture.astro src/pages/zhihu-capture-offline.astro
-      - name: Start local Astro rendering server
+      - name: Start isolated local Astro rendering server
         run: |
-          ./node_modules/.bin/astro dev --host 127.0.0.1 --port 4321 > /tmp/zhihu-astro.log 2>&1 &
+          cat > astro-zhihu.config.mjs <<'EOF'
+          import { defineConfig } from 'astro/config';
+          export default defineConfig({output:'static', server: {host:'127.0.0.1', port:4321}});
+          EOF
+          ./node_modules/.bin/astro dev --config ./astro-zhihu.config.mjs --host 127.0.0.1 --port 4321 > /tmp/zhihu-astro.log 2>&1 &
           echo $! > /tmp/zhihu-astro.pid
-          for i in $(seq 1 75); do
-            if curl --fail --silent 'http://127.0.0.1:4321/zhihu-capture-offline' -o /tmp/zhihu-page.html; then
-              echo "Astro capture page is ready"
+          for i in $(seq 1 50); do
+            if curl --fail --silent --connect-timeout 2 --max-time 6 'http://127.0.0.1:4321/zhihu-capture-offline' -o /tmp/zhihu-page.html; then
+              echo "Isolated Astro capture page is ready"
               exit 0
+            fi
+            if (( i % 10 == 0 )); then
+              echo "Waiting for local capture route... attempt $i"
+              tail -25 /tmp/zhihu-astro.log
             fi
             sleep 2
           done
-          tail -120 /tmp/zhihu-astro.log
+          echo "Local Astro capture page unavailable"
+          tail -160 /tmp/zhihu-astro.log
           exit 1
       - name: Capture all source SVGs and all three lab scenarios
         run: |
