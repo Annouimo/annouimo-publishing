@@ -30,13 +30,13 @@ jobs:
       - name: Fetch locked original notes and create local-only capture route
         run: |
           npm run prepare:content
-          cp scripts/zhihu-maxwell-capture.astro src/pages/__zhihu_capture.astro
+          cp scripts/zhihu-maxwell-capture.astro src/pages/zhihu-capture-offline.astro
       - name: Start local Astro rendering server
         run: |
           ./node_modules/.bin/astro dev --host 127.0.0.1 --port 4321 > /tmp/zhihu-astro.log 2>&1 &
           echo $! > /tmp/zhihu-astro.pid
           for i in $(seq 1 75); do
-            if curl --fail --silent 'http://127.0.0.1:4321/__zhihu_capture' -o /tmp/zhihu-page.html; then
+            if curl --fail --silent 'http://127.0.0.1:4321/zhihu-capture-offline' -o /tmp/zhihu-page.html; then
               echo "Astro capture page is ready"
               exit 0
             fi
