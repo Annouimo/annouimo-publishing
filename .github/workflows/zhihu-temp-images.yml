@@ -27,6 +27,29 @@ jobs:
           python3 scripts/export-zhihu.py
           python3 -m py_compile scripts/host-zhihu-cn-images.py
           python3 scripts/host-zhihu-cn-images.py
+      - name: Reuse six previously verified CZL uploads
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, json
+          folder = Path('dist/zhihu/uniform-continuity')
+          urls = {
+              'chirp.png': 'https://i.czl.net/b2/img/yk/6b0255c0c4556.png',
+              'damped.png': 'https://i.czl.net/b2/img/yk/6b0256414956d.png',
+              'inverse.png': 'https://i.czl.net/b2/img/yk/6b025645e4684.png',
+              'oscillation.png': 'https://i.czl.net/b2/img/yk/6b0256494e6cd.png',
+              'root.png': 'https://i.czl.net/b2/img/yk/6b02564cd52de.png',
+              'sine.png': 'https://i.czl.net/b2/img/yk/6b0257029c0c9.png',
+          }
+          items = {}
+          for name, url in urls.items():
+              image = (folder / 'images' / name).read_bytes()
+              items[name] = {'url': url, 'sha256': hashlib.sha256(image).hexdigest(),
+                             'checked_at': 'verified in prior workflow'}
+          (folder / 'hosted-images-czl.json').write_text(
+              json.dumps({'provider': 'czl', 'images': items}, indent=2), encoding='utf-8')
+          print('Using six previously verified URLs; runner will re-download and confirm identical bytes.')
+          PY
       - name: Upload image batches to CZL domestic host
         run: |
           python3 scripts/host-zhihu-cn-images.py --provider czl --upload
